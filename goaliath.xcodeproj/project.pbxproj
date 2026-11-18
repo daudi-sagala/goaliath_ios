@@ -29,9 +29,134 @@
 		274FF0C430A0227600C4C4D1 /* goaliathUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = goaliathUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		274FF0E030A023A600C4C4D1 /* Exceptions for "goaliath" folder in "goaliathTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				App/Goals/PickGoalsView.swift,
+				App/Goals/SharedGoal.swift,
+				App/Goals/SharedGoalItemView.swift,
+				App/Home/GoaliathCardSampleData.swift,
+				App/Home/GoaliathSavedTimelineView.swift,
+				App/Tokens/UserTokensDetailView.swift,
+				App/Welcome/LoginView.swift,
+				Info.plist,
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-SemiBold.ttf",
+				"Resources/Fonts/Nunito/Nunito-Black.ttf",
+				"Resources/Fonts/Nunito/Nunito-BlackItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Bold.ttf",
+				"Resources/Fonts/Nunito/Nunito-BoldItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraBold.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraBoldItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraLight.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraLightItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Italic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Light.ttf",
+				"Resources/Fonts/Nunito/Nunito-LightItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Medium.ttf",
+				"Resources/Fonts/Nunito/Nunito-MediumItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Regular.ttf",
+				"Resources/Fonts/Nunito/Nunito-SemiBold.ttf",
+				"Resources/Fonts/Nunito/Nunito-SemiBoldItalic.ttf",
+			);
+			target = 274FF0B930A0227600C4C4D1 /* goaliathTests */;
+		};
+		274FF0E130A023A600C4C4D1 /* Exceptions for "goaliath" folder in "goaliathUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				App/Goals/PickGoalsView.swift,
+				App/Goals/SharedGoal.swift,
+				App/Goals/SharedGoalItemView.swift,
+				App/Home/GoaliathCardSampleData.swift,
+				App/Home/GoaliathSavedTimelineView.swift,
+				App/Tokens/UserTokensDetailView.swift,
+				App/Welcome/LoginView.swift,
+				Info.plist,
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Condensed-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_Expanded-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiCondensed-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka_SemiExpanded-SemiBold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Bold.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Light.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Medium.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-Regular.ttf",
+				"Resources/Fonts/Fredoka/Fredoka-SemiBold.ttf",
+				"Resources/Fonts/Nunito/Nunito-Black.ttf",
+				"Resources/Fonts/Nunito/Nunito-BlackItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Bold.ttf",
+				"Resources/Fonts/Nunito/Nunito-BoldItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraBold.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraBoldItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraLight.ttf",
+				"Resources/Fonts/Nunito/Nunito-ExtraLightItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Italic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Light.ttf",
+				"Resources/Fonts/Nunito/Nunito-LightItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Medium.ttf",
+				"Resources/Fonts/Nunito/Nunito-MediumItalic.ttf",
+				"Resources/Fonts/Nunito/Nunito-Regular.ttf",
+				"Resources/Fonts/Nunito/Nunito-SemiBold.ttf",
+				"Resources/Fonts/Nunito/Nunito-SemiBoldItalic.ttf",
+			);
+			target = 274FF0C330A0227600C4C4D1 /* goaliathUITests */;
+		};
+		274FF19E30A181B500C4C4D1 /* Exceptions for "goaliath" folder in "goaliath" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 274FF0AC30A0227400C4C4D1 /* goaliath */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		274FF0AF30A0227400C4C4D1 /* goaliath */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				274FF19E30A181B500C4C4D1 /* Exceptions for "goaliath" folder in "goaliath" target */,
+				274FF0E030A023A600C4C4D1 /* Exceptions for "goaliath" folder in "goaliathTests" target */,
+				274FF0E130A023A600C4C4D1 /* Exceptions for "goaliath" folder in "goaliathUITests" target */,
+			);
 			path = goaliath;
 			sourceTree = "<group>";
 		};
@@ -399,26 +524,34 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JH9RVESMJJ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = goaliath/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Goaliath;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "goaliath-app.goaliath";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -431,26 +564,34 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JH9RVESMJJ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = goaliath/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Goaliath;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "goaliath-app.goaliath";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
