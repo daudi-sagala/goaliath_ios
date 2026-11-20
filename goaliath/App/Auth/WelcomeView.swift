@@ -1,120 +1,117 @@
 import SwiftUI
-import AuthenticationServices
 
-/// Native Apple + email verification code onboarding
+/// Public landing screen. Sign-in and account creation both use the same
+/// email/password form and single GoaliathAuthStore supplied by MainView.
 struct WelcomeView: View {
-    var geometry:GeometryProxy
-    @StateObject private var apple=GoaliathAppleSignIn()
-    @State private var email=""
-    @State private var code=""
-    @State private var showEmail=false
-    @State private var awaitingCode=false
-    @State private var busy=false
-    @State private var errorMessage:String?
+    @EnvironmentObject private var auth: GoaliathAuthStore
+    @State private var showAuthentication = false
+    @State private var createAccount = false
 
-    private let navy=Color(hex:"263B55")
-    private let blue=Color(hex:"526FA5")
-    var body:some View {
-        VStack(spacing:28) {
-            Spacer(minLength:20)
-            VStack(spacing:3) {
-                Text("Goaliath").font(.custom("Fredoka-SemiBold",size:54)).foregroundStyle(navy)
-              
+    private let navy = Color(hex: "263B55")
+    private let blue = Color(hex: "526FA5")
+
+    var body: some View {
+        VStack(spacing: 25) {
+            Spacer(minLength: 24)
+            VStack(spacing: 4) {
+                Text("Goaliath")
+                    .font(.custom("Fredoka-SemiBold", size: 54))
+                    .foregroundStyle(navy)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
                 Text("ORGANIZE  ·  CONNECT  ·  ACHIEVE")
-                    .font(.custom("Nunito-Bold", size: 14))
-                    .tracking(1.2)
+                    .font(.custom("Nunito-Bold", size: 13))
+                    .tracking(1.1)
                     .foregroundStyle(blue)
             }
             Spacer()
-            VStack(spacing:8) {
+            VStack(spacing: 12) {
                 Text("Discover the hidden networks around you.")
-                    .font(.custom("Fredoka-SemiBold",size:34)).multilineTextAlignment(.center)
-                Text("Find people and opportunities connected to what you want to achieve.")
-                    .font(.custom("Nunito-Regular",size:18))
-                    .multilineTextAlignment(.center).foregroundStyle(.secondary)
+                    .font(.custom("Fredoka-SemiBold", size: 32))
+                    .foregroundStyle(navy)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Find the people, connections, and opportunities that can help you reach your goals.")
+                    .font(.custom("Nunito-Regular", size: 17))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
-            VStack(spacing:15) {
-                SignInWithAppleButton(.continue,onRequest:apple.configure,onCompletion:apple.handle)
-                    .signInWithAppleButtonStyle(.black)
-                    .frame(height:54).clipShape(RoundedRectangle(cornerRadius:15))
-                    .disabled(apple.signingIn)
-                Button {showEmail=true} label: {
-                    Label("Continue with Email",systemImage:"envelope")
-                        .font(.headline).frame(maxWidth:.infinity).frame(height:54)
-                        .background(.white,in:RoundedRectangle(cornerRadius:15))
-                }.buttonStyle(.plain)
-                Text("By continuing, you agree to our Terms and Privacy Policy.")
-                    .font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                if let message=apple.errorMessage {Text(message).foregroundStyle(.red).font(.caption)}
+            VStack(spacing: 12) {
+                Button {
+                    presentAuthentication(signUp: false)
+                } label: {
+                    Label("Sign in with email", systemImage: "envelope.fill")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                }
+                .foregroundStyle(.white)
+                .background(blue, in: RoundedRectangle(cornerRadius: 15))
+                .buttonStyle(.plain)
+
+                Button {
+                    presentAuthentication(signUp: true)
+                } label: {
+                    Text("Create an account")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                }
+                .foregroundStyle(navy)
+                .background(.white, in: RoundedRectangle(cornerRadius: 15))
+                .buttonStyle(.plain)
+
+                Text("Apple and Google sign-in will be available later.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+
+                if let error = auth.errorMessage {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                    Button("Retry session check") {
+                        _Concurrency.Task { await auth.retryRestore() }
+                    }
+                    .font(.caption.weight(.semibold))
+                }
             }
-            Spacer(minLength:12)
+            Spacer(minLength: 14)
         }
-        .padding(.horizontal,26)
-        .frame(maxWidth:.infinity,maxHeight:.infinity)
-        .background(Color(hex:"EDF6F9").ignoresSafeArea())
-        .sheet(isPresented:$showEmail) {emailSheet.presentationDetents([.medium,.large])}
+        .padding(.horizontal, 26)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(hex: "EDF6F9").ignoresSafeArea())
+        .sheet(isPresented: $showAuthentication) {
+            NavigationStack {
+                GoaliathSignInView(startInSignUpMode: createAccount)
+                    .id(createAccount)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Close") { showAuthentication = false }
+                        }
+                    }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
+        .onChange(of: auth.user?.id) { _, newID in
+            if newID != nil { showAuthentication = false }
+        }
     }
 
-    private var emailSheet:some View {
-        NavigationStack {
-            VStack(alignment:.leading,spacing:17) {
-                Text(awaitingCode ? "Check your email" : "Continue with email")
-                    .font(.system(size:26,weight:.bold,design:.rounded)).foregroundStyle(navy)
-                Text(awaitingCode ? "Enter the 6-digit code sent to \(email)." : "We'll email you a one-time code. No password required.")
-                    .font(.subheadline).foregroundStyle(.secondary)
-                if !awaitingCode {
-                    TextField("Email address",text:$email)
-                        .keyboardType(.emailAddress).textInputAutocapitalization(.never)
-                        .textContentType(.emailAddress).autocorrectionDisabled()
-                        .padding(14).background(.white,in:RoundedRectangle(cornerRadius:12))
-                } else {
-                    TextField("6-digit code",text:$code)
-                        .keyboardType(.numberPad).textContentType(.oneTimeCode)
-                        .padding(14).background(.white,in:RoundedRectangle(cornerRadius:12))
-                }
-                if let errorMessage {Text(errorMessage).foregroundStyle(.red).font(.caption)}
-                Button(busy ? "Please wait…" : (awaitingCode ? "Sign in" : "Send code")) {authenticate()}
-                    .font(.headline).foregroundStyle(.white)
-                    .frame(maxWidth:.infinity).frame(height:52)
-                    .background(blue,in:RoundedRectangle(cornerRadius:14))
-                    .disabled(busy || (awaitingCode ? code.count != 6 : !email.contains("@")))
-                if awaitingCode {
-                    Button("Use a different email") {awaitingCode=false;code="";errorMessage=nil}
-                        .foregroundStyle(blue)
-                    Button("Resend code") {sendCode()}.disabled(busy)
-                        .font(.subheadline).foregroundStyle(blue)
-                }
-                Spacer(minLength:0)
-            }.padding(22)
-                .toolbar {ToolbarItem(placement:.topBarTrailing) {Button("Close") {showEmail=false}}}
-        }
-    }
-    private func sendCode() {
-        busy=true;errorMessage=nil
-        _Concurrency.Task { @MainActor in
-            defer{busy=false}
-            do {try await AppManager.shared.requestEmailCode(email);awaitingCode=true}
-            catch{errorMessage=error.localizedDescription}
-        }
-    }
-    private func authenticate() {
-        if !awaitingCode {sendCode();return}
-        busy=true;errorMessage=nil
-        _Concurrency.Task { @MainActor in
-            defer{busy=false}
-            do {
-                try await AppManager.shared.signInWithEmailCode(email:email,code:code)
-                showEmail=false;awaitingCode=false;code=""
-            }catch{errorMessage=error.localizedDescription}
-        }
+    private func presentAuthentication(signUp: Bool) {
+        createAccount = signUp
+        auth.errorMessage = nil
+        showAuthentication = true
     }
 }
 
 extension Color {
     init(hex: String) {
-        let value = UInt64(hex, radix: 16) ?? 0
-
+        let value = UInt64(hex.trimmingCharacters(in: CharacterSet(charactersIn: "#")), radix: 16) ?? 0
         self.init(
             .sRGB,
             red: Double((value >> 16) & 0xFF) / 255,

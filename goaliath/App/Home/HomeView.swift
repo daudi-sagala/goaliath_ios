@@ -13,6 +13,8 @@ struct HomeView: View {
     /// scheduleActivities; this view does not pretend the remote write succeeded.
     var onSetScheduleStatus: ((GoaliathScheduleActivity, TimelineScheduleStatus) -> Void)? = nil
     var onOpenScheduleActivity: ((GoaliathScheduleActivity) -> Void)? = nil
+    /// Passed by MainView. Optional so standalone SwiftUI previews still compile.
+    var onSignOut: (() -> Void)? = nil
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var cardGroupIndex = 0
@@ -24,6 +26,7 @@ struct HomeView: View {
     @State private var scheduleError: String?
 
     @State private var showMenu = false
+    @State private var showSignOutConfirmation = false
     @State private var showGoals = false
     @State private var activeMenuDestination: GoaliathMenuDestination?
     @StateObject private var demoChats = GoaliathChatStore(currentUserId: "", conversations: [])
@@ -166,6 +169,7 @@ struct HomeView: View {
         do {
             switch action {
             case .respond(let id,let text): try await live.postReply(text, postId: id)
+            case .respondMedia(let id,let text,let media): try await live.postReply(text, postId: id, media: media)
             case .askForDetails(let id,let question): try await live.postReply(question, postId: id)
             case .skip(let id): try await live.dismissPost(id)
             case .report(let id,let reason,let notes): try await live.reportPost(id, reason: reason, notes: notes)
@@ -211,7 +215,8 @@ struct HomeView: View {
                     },
                     onCommentPostAction: { action in
                         _Concurrency.Task { await handleCommentAction(action) }
-                    })
+                    },
+                    onSubmitForm: { response in try await live.submitQuestionnaire(response) })
                 HomeOverLay(
                     geometry: geometry,
                     showMenu: $showMenu,
@@ -248,6 +253,9 @@ struct HomeView: View {
                     onSelect: { destination in
                         showMenu = false
                         activeMenuDestination = destination
+                    },
+                    onSignOut: onSignOut == nil ? nil : {
+                        showSignOutConfirmation = true
                     }
                 )
                 .frame(width: geometry.size.width * 0.72)
@@ -256,8 +264,12 @@ struct HomeView: View {
             }
         }
         .onAppear {
-            demoChats.configure(api: live.api,currentUserId:live.profile?.userId ?? "")
-            _Concurrency.Task { await demoChats.refresh() }
+            if live.isPreviewMode {
+                demoChats.configurePreview()
+            } else {
+                demoChats.configure(api: live.api, currentUserId: live.profile?.userId ?? "")
+                _Concurrency.Task { await demoChats.refresh() }
+            }
             now = Date()
             reloadLocalSchedule()
             reconcilePin(at: now)
@@ -269,7 +281,9 @@ struct HomeView: View {
         }
         .onChange(of: scenePhase) { phase in
             if phase == .active {
-                _Concurrency.Task { await live.refresh(); await demoChats.refresh() }
+                if !live.isPreviewMode {
+                    _Concurrency.Task { await live.refresh(); await demoChats.refresh() }
+                }
                 now = Date()
                 reloadLocalSchedule()
                 reconcilePin(at: now)
@@ -288,6 +302,14 @@ struct HomeView: View {
             changeCardGroup(.next)
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showMenu)
+        .confirmationDialog("Sign out of Goaliath?", isPresented: $showSignOutConfirmation, titleVisibility: .visible) {
+            Button("Sign out", role: .destructive) {
+                showMenu = false
+                onSignOut?()
+            }
+        } message: {
+            Text("You'll return to the welcome screen.")
+        }
         .alert("Goaliath", isPresented: Binding(get:{ live.errorMessage != nil },set:{if !$0 {live.errorMessage=nil}})) {
             Button("OK",role:.cancel){live.errorMessage=nil}
         } message: { Text(live.errorMessage ?? "Something went wrong") }

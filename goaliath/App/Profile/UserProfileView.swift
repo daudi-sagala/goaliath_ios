@@ -81,7 +81,7 @@ struct UserProfileView: View {
                     .font(.system(size: 12, weight: .heavy, design: .rounded)).tracking(1.1)
                     .foregroundStyle(Color(red: 0.92, green: 0.62, blue: 0.19))
                 Spacer()
-                Text("Demo balance").font(.caption2.weight(.bold))
+                Text("Token balance").font(.caption2.weight(.bold))
                     .foregroundStyle(.white.opacity(0.85))
             }
             HStack(alignment: .firstTextBaseline, spacing: 8) {

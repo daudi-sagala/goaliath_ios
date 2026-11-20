@@ -8,6 +8,11 @@ import Foundation
 
 
 struct Workout: Codable {
+    // V4 canonical media arrays; optional for backwards-compatible decoding.
+    var image_urls: [String]? = nil
+    var video_urls: [String]? = nil
+    var gif_urls: [String]? = nil
+
     let workoutId: String
     let workoutImageUrls: [String]
     let workoutTitle: String

@@ -4,6 +4,8 @@ struct GoaliathChatThreadView: View {
     @ObservedObject var store: GoaliathChatStore
     let conversationId: String
     @State private var messageDraft = ""
+    @State private var mediaLinks = GoaliathMediaLinks()
+    @State private var showingMediaLinks = false
     @FocusState private var isTyping: Bool
 
     private var thread: GoaliathChatConversation? { store.conversation(conversationId) }
@@ -46,6 +48,19 @@ struct GoaliathChatThreadView: View {
         .background(GoaliathMenuStyle.background.ignoresSafeArea())
         .navigationTitle(thread?.isSupport == true ? "Support" : "Conversation")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingMediaLinks) {
+            NavigationStack { Form {
+                Section("Media links") {
+                    TextField("Image HTTPS URLs, comma-separated", text: Binding(get: { mediaLinks.image_urls.joined(separator: ",") }, set: { mediaLinks.image_urls = Self.urls($0) }))
+                    TextField("Video HTTPS URLs, comma-separated", text: Binding(get: { mediaLinks.video_urls.joined(separator: ",") }, set: { mediaLinks.video_urls = Self.urls($0) }))
+                    TextField("GIF HTTPS URLs, comma-separated", text: Binding(get: { mediaLinks.gif_urls.joined(separator: ",") }, set: { mediaLinks.gif_urls = Self.urls($0) }))
+                }
+                Section { Text("Only attach hosted URLs you intend to share. Chat media URLs may be accessible to others if forwarded.").font(.caption) }
+            }.navigationTitle("Attachments").toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showingMediaLinks=false } } } }
+        }
+    }
+    private static func urls(_ input: String) -> [String] {
+        input.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
     }
 
     private func header(_ thread: GoaliathChatConversation) -> some View {
@@ -68,10 +83,23 @@ struct GoaliathChatThreadView: View {
         return HStack {
             if mine { Spacer(minLength: 55) }
             VStack(alignment: .trailing, spacing: 5) {
-                Text(message.body)
+                if !message.body.isEmpty { Text(message.body)
                     .font(.system(size: 15))
                     .foregroundStyle(mine ? Color.white : GoaliathMenuStyle.ink)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                ForEach(message.image_urls ?? [], id: \.self) { link in
+                    if let url = URL(string: link), url.scheme == "https" {
+                        AsyncImage(url: url) { image in image.resizable().scaledToFit() } placeholder: { ProgressView() }
+                            .frame(maxWidth: 230, maxHeight: 170)
+                    }
+                }
+                ForEach(message.gif_urls ?? [], id: \.self) { link in
+                    if let url = URL(string: link), url.scheme == "https" { Link("Open GIF", destination: url) }
+                }
+                ForEach(message.video_urls ?? [], id: \.self) { link in
+                    if let url = URL(string: link), url.scheme == "https" { Link("Watch video", destination: url) }
+                }
                 Text(message.sentAt.formatted(.dateTime.hour().minute()))
                     .font(.caption2)
                     .foregroundStyle(mine ? .white.opacity(0.8) : GoaliathMenuStyle.muted)
@@ -87,6 +115,8 @@ struct GoaliathChatThreadView: View {
 
     private var composer: some View {
         HStack(alignment: .bottom, spacing: 10) {
+            Button { showingMediaLinks = true } label: { Image(systemName: "paperclip").font(.title3) }
+                .accessibilityLabel("Add image, video or GIF links")
             TextField("Write a message…", text: $messageDraft, axis: .vertical)
                 .lineLimit(1...4)
                 .focused($isTyping)
@@ -101,8 +131,8 @@ struct GoaliathChatThreadView: View {
                     .frame(width: 42, height: 42)
                     .background(GoaliathMenuStyle.green, in: Circle())
             }
-            .disabled(messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .opacity(messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
+            .disabled(messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && mediaLinks.total == 0)
+            .opacity(messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && mediaLinks.total == 0 ? 0.5 : 1)
             .accessibilityLabel("Send message")
         }
         .padding(12)
@@ -110,7 +140,8 @@ struct GoaliathChatThreadView: View {
     }
 
     private func send() {
-        store.send(messageDraft, in: conversationId)
-        messageDraft = ""
+        guard mediaLinks.total <= 12, (mediaLinks.image_urls+mediaLinks.video_urls+mediaLinks.gif_urls).allSatisfy({URL(string: $0)?.scheme == "https"}) else { return }
+        store.send(messageDraft, in: conversationId, media: mediaLinks)
+        messageDraft = ""; mediaLinks = GoaliathMediaLinks()
     }
 }

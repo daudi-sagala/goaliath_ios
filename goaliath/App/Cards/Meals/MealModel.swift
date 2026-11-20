@@ -9,6 +9,11 @@ import Foundation
 
 // MARK: - Model
 struct SuggestedMeal: Codable, Identifiable {
+    // V4 canonical media arrays; optional for backwards-compatible decoding.
+    var image_urls: [String]? = nil
+    var video_urls: [String]? = nil
+    var gif_urls: [String]? = nil
+
     let id: UUID
     let suggestedMealId: String
     let title: String
@@ -29,6 +34,11 @@ struct SuggestedMeal: Codable, Identifiable {
     }
     
     struct Meal: Codable {
+    // V4 canonical media arrays; optional for backwards-compatible decoding.
+    var image_urls: [String]? = nil
+    var video_urls: [String]? = nil
+    var gif_urls: [String]? = nil
+
         let mealId: String
         let title: String
         let imageURL: String?

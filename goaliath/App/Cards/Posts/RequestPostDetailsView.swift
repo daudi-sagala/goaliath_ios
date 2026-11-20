@@ -18,6 +18,9 @@ struct RequestPostReply: Codable, Identifiable, Hashable {
     let body: String
     let createdAt: String
     let parentReplyId: String?
+    var image_urls: [String]? = nil
+    var video_urls: [String]? = nil
+    var gif_urls: [String]? = nil
 
     var id: String { replyId }
 
@@ -133,8 +136,8 @@ struct RequestPostDetailsView: View {
                 RequestDetailsRespondSheet(
                     requesterName: firstName,
                     isPreview: onAction == nil
-                ) { response in
-                    onAction?(.respond(postId: post.postId, text: response))
+                ) { response, media in
+                    onAction?(.respondMedia(postId: post.postId, text: response, media: media))
                 }
             }
             .presentationDetents([.medium, .large])
@@ -409,11 +412,33 @@ private struct RequestPostReplyRow: View {
                         .foregroundStyle(accent)
                 }
 
-                Text(reply.body)
-                    .font(.system(size: 14))
-                    .foregroundStyle(ink.opacity(0.92))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .textSelection(.enabled)
+                if !reply.body.isEmpty {
+                    Text(reply.body)
+                        .font(.system(size: 14))
+                        .foregroundStyle(ink.opacity(0.92))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+                if !(reply.image_urls ?? []).isEmpty || !(reply.video_urls ?? []).isEmpty || !(reply.gif_urls ?? []).isEmpty {
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 8) {
+                            ForEach(reply.image_urls ?? [], id: \.self) { source in
+                                AsyncImage(url: RequestDetailsMedia.validURL(source)) { image in
+                                    image.resizable().scaledToFill()
+                                } placeholder: { RequestDetailsMediaPlaceholder(symbol: "photo") }
+                                .frame(width: 180, height: 130).clipped().clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            ForEach(reply.video_urls ?? [], id: \.self) { source in
+                                RequestDetailsVideoTile(urlString: source)
+                                    .frame(width: 180, height: 130).clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            ForEach(reply.gif_urls ?? [], id: \.self) { source in
+                                RequestDetailsGIFTile(urlString: source)
+                                    .frame(width: 180, height: 130).clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                        }
+                    }.scrollIndicators(.hidden)
+                }
 
                 Label(RequestDetailsDate.display(reply.createdAt), systemImage: "clock")
                     .font(.caption2)
@@ -638,13 +663,20 @@ private struct RequestDetailsComposerContent: View {
     let placeholder: String
     let submitTitle: String
     let isPreview: Bool
-    let onSubmit: (String) -> Void
+    let onSubmit: (String, GoaliathMediaLinks) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var draft = ""
+    @State private var images = ""
+    @State private var videos = ""
+    @State private var gifs = ""
 
     private var cleanedDraft: String {
         draft.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func links(_ text: String) -> [String] {
+        text.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
     }
 
     var body: some View {
@@ -658,6 +690,14 @@ private struct RequestDetailsComposerContent: View {
             } header: {
                 Text(placeholder)
             }
+            Section("Attachments") {
+                TextField("Image HTTPS URLs (comma-separated)", text: $images)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                TextField("Video HTTPS URLs (comma-separated)", text: $videos)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                TextField("GIF HTTPS URLs (comma-separated)", text: $gifs)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+            }
             if isPreview {
                 Section {
                     Label("Design preview only. No message will be sent.", systemImage: "info.circle")
@@ -666,12 +706,12 @@ private struct RequestDetailsComposerContent: View {
             }
             Section {
                 Button(isPreview ? "Close Preview" : submitTitle) {
-                    if !isPreview { onSubmit(cleanedDraft) }
+                    if !isPreview { onSubmit(cleanedDraft, GoaliathMediaLinks(image_urls: Self.links(images), video_urls: Self.links(videos), gif_urls: Self.links(gifs))) }
                     dismiss()
                 }
                 .font(.headline)
                 .frame(maxWidth: .infinity)
-                .disabled(!isPreview && cleanedDraft.isEmpty)
+                .disabled(!isPreview && cleanedDraft.isEmpty && images.isEmpty && videos.isEmpty && gifs.isEmpty)
             }
         }
         .toolbar {
@@ -685,7 +725,7 @@ private struct RequestDetailsComposerContent: View {
 private struct RequestDetailsRespondSheet: View {
     let requesterName: String
     let isPreview: Bool
-    let onSubmit: (String) -> Void
+    let onSubmit: (String, GoaliathMediaLinks) -> Void
 
     var body: some View {
         RequestDetailsComposerContent(

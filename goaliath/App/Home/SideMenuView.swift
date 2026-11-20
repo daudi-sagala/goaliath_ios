@@ -14,6 +14,7 @@ struct SideMenuView: View {
     let secondary: Color
     let accent: Color
     let onSelect: (GoaliathMenuDestination) -> Void
+    var onSignOut: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -32,6 +33,20 @@ struct SideMenuView: View {
             menuButton("Chat with Support", icon: "questionmark.bubble", destination: .support)
 
             Spacer(minLength: 0)
+
+            if let onSignOut {
+                Divider().padding(.bottom, 10)
+                Button(action: onSignOut) {
+                    Label("Sign out", systemImage: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(height: 50)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Sign out of Goaliath")
+                .padding(.bottom, 16)
+            }
         }
         .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)

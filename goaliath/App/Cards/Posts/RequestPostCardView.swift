@@ -6,6 +6,7 @@ import WebKit
 
 enum RequestPostAction {
     case respond(postId: String, text: String)
+    case respondMedia(postId: String, text: String, media: GoaliathMediaLinks)
     case askForDetails(postId: String, question: String)
     case skip(postId: String)
     case report(postId: String, reason: String, notes: String)

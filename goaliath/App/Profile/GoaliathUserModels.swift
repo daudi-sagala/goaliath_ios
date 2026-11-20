@@ -111,6 +111,9 @@ struct GoaliathChatMessage: Identifiable, Codable, Equatable {
     var body: String
     var sentAt: Date
     var isRead: Bool
+    var image_urls: [String]? = nil
+    var video_urls: [String]? = nil
+    var gif_urls: [String]? = nil
 }
 
 struct GoaliathChatConversation: Identifiable, Codable, Equatable {

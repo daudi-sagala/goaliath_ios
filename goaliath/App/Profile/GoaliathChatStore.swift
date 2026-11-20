@@ -8,6 +8,7 @@ final class GoaliathChatStore: ObservableObject {
     @Published private(set) var errorMessage: String?
     private(set) var currentUserId: String = ""
     private var api: GoaliathAPIClient?
+    var isUsingSampleConversations: Bool { api == nil }
 
     init(currentUserId: String = "", conversations: [GoaliathChatConversation] = []) {
         self.currentUserId = currentUserId
@@ -15,6 +16,13 @@ final class GoaliathChatStore: ObservableObject {
     }
     func configure(api: GoaliathAPIClient, currentUserId: String) {
         self.api = api; self.currentUserId = currentUserId
+    }
+    /// Disable all chat network actions in the explicit sample-data preview.
+    func configurePreview() {
+        api = nil
+        currentUserId = GoaliathMenuDemoData.profile.userId
+        conversations = GoaliathMenuDemoData.conversations()
+        errorMessage = nil
     }
     func refresh() async {
         guard let api else { return }
@@ -27,13 +35,13 @@ final class GoaliathChatStore: ObservableObject {
     func conversation(_ id: String) -> GoaliathChatConversation? {
         conversations.first(where: { $0.id == id })
     }
-    func send(_ body: String, in conversationId: String) {
+    func send(_ body: String, in conversationId: String, media: GoaliathMediaLinks = GoaliathMediaLinks()) {
         let message = body.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !message.isEmpty, let api else { return }
+        guard !message.isEmpty || media.total > 0, let api else { return }
         _Concurrency.Task { @MainActor in
             do {
                 let _: LiveCreatedMessage = try await api.request(
-                    "v1/conversations/\(conversationId)/messages",method:"POST",body:["body": message])
+                    "v1/conversations/\(conversationId)/messages",method:"POST",body: ChatMediaRequest(body: message, image_urls: media.image_urls, video_urls: media.video_urls, gif_urls: media.gif_urls))
                 await refresh()
             } catch { errorMessage = error.localizedDescription }
         }
@@ -54,5 +62,6 @@ final class GoaliathChatStore: ObservableObject {
         return result.conversationId
     }
 }
+private struct ChatMediaRequest: Encodable { let body: String; let image_urls: [String]; let video_urls: [String]; let gif_urls: [String] }
 struct LiveReadResult: Decodable { let markedRead: Bool }
 struct LiveConversationCreated: Decodable { let conversationId: String }

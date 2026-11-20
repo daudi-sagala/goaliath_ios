@@ -19,6 +19,7 @@ struct CardContentLayer: View {
     var onRequestPostAction: ((RequestPostAction) -> Void)? = nil
     var onTipPostAction: ((TipPostAction) -> Void)? = nil
     var onCommentPostAction: ((CommentPostAction) -> Void)? = nil
+    var onSubmitForm: ((FormResponse) async throws -> Void)? = nil
 
     private let customCardTypes: Set<String> = [
         "post", "message", "gift", "userStatus", "suggestedMeal",
@@ -75,7 +76,7 @@ struct CardContentLayer: View {
             )
         case "formData":
             if let data = selectedCard.cardDataType.formData {
-                FormCardDetails(form: data)
+                FormCardDetails(form: data, onSubmit: onSubmitForm)
             } else {
                 MissingCardPayload()
             }
@@ -356,8 +357,12 @@ private struct ActivityCardDetails: View {
 
 private struct FormCardDetails: View {
     let form: FormData
+    var onSubmit: ((FormResponse) async throws -> Void)? = nil
     @State private var answers: [String: String] = [:]
     @State private var previewResponse: FormResponse?
+    @State private var submitting = false
+    @State private var submitted = false
+    @State private var submissionError: String?
 
     private var missingRequired: Bool {
         form.items.contains { item in
@@ -388,18 +393,36 @@ private struct FormCardDetails: View {
                         filledAnswers[item.itemId] = defaultValue
                     }
                 }
-                previewResponse = FormResponse(
-                    formDataId: form.formDataId,
-                    answers: filledAnswers
-                )
+                let response = FormResponse(formDataId: form.formDataId, answers: filledAnswers)
+                guard let onSubmit else { previewResponse = response; return }
+                submissionError = nil
+                submitting = true
+                _Concurrency.Task {
+                    do {
+                        try await onSubmit(response)
+                        submitted = true
+                        previewResponse = nil
+                    } catch {
+                        submissionError = error.localizedDescription
+                    }
+                    submitting = false
+                }
             } label: {
                 Text(form.submitTitle)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(CardPalette.accent)
-            .disabled(missingRequired)
+            .disabled(missingRequired || submitting || submitted)
 
+            if submitted {
+                Label("Submitted to Goaliath", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline).foregroundStyle(.green)
+            }
+            if submitting { ProgressView("Submitting response…") }
+            if let submissionError {
+                Text(submissionError).font(.caption).foregroundStyle(.red)
+            }
             if form.allowSkip {
                 Button("Skip for now") { previewResponse = nil; answers.removeAll() }
                     .font(.subheadline)
@@ -413,8 +436,10 @@ private struct FormCardDetails: View {
                       systemImage: "checkmark.circle.fill")
                     .font(.subheadline).foregroundStyle(.green)
             }
-            Text("Preview mode: answers are not sent or stored.")
-                .font(.caption).foregroundStyle(CardPalette.muted)
+            if onSubmit == nil {
+                Text("Preview mode: answers are not sent or stored.")
+                    .font(.caption).foregroundStyle(CardPalette.muted)
+            }
         }
     }
 }

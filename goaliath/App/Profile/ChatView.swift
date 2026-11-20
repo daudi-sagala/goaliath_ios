@@ -25,8 +25,10 @@ struct ChatView: View {
                     Text("Your conversations with the people helping you move forward.")
                         .font(.subheadline).foregroundStyle(GoaliathMenuStyle.muted)
                 }
-                Label("Preview conversations · Messages are stored only while the app is running", systemImage: "info.circle")
-                    .font(.caption).foregroundStyle(GoaliathMenuStyle.muted)
+                if store.isUsingSampleConversations {
+                    Label("Sample conversations · Messages are not sent to the server", systemImage: "info.circle")
+                        .font(.caption).foregroundStyle(GoaliathMenuStyle.muted)
+                }
                 LazyVStack(spacing: 10) {
                     ForEach(filtered) { conversation in
                         NavigationLink {

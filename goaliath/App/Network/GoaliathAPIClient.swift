@@ -1,7 +1,8 @@
 import Foundation
+import UniformTypeIdentifiers
 
 // iOS client for the integrated Goaliath backend.
-// Add once to the app target. Better Auth owns sessions; auth API calls live in GoaliathBetterAuthClient.
+// Better Auth owns sessions; auth endpoints live in GoaliathAuthAPI.
 struct GoaliathAPIError: LocalizedError {
     let status: Int
     let message: String
@@ -19,6 +20,44 @@ struct GoaliathAPIClient {
         self.baseURL = baseURL
         self.bearerToken = bearerToken
         self.localDevUserID = localDevUserID
+    }
+
+    /// Upload selected media to a configured public Supabase Storage bucket.
+    /// Private content must not use this public-upload helper.
+    func uploadMedia(fileURL: URL) async throws -> (url: String, kind: String) {
+        guard let url = URL(string: "v1/media/upload", relativeTo: baseURL)?.absoluteURL else {
+            throw GoaliathAPIError(status: 0, message: "Invalid media upload URL")
+        }
+        let ext = fileURL.pathExtension.lowercased()
+        let mime: String
+        switch ext {
+        case "jpg", "jpeg": mime = "image/jpeg"
+        case "png": mime = "image/png"
+        case "webp": mime = "image/webp"
+        case "gif": mime = "image/gif"
+        case "heic", "heif": mime = "image/heic"
+        case "mp4", "m4v": mime = "video/mp4"
+        case "mov": mime = "video/quicktime"
+        case "webm": mime = "video/webm"
+        default: throw GoaliathAPIError(status: 415, message: "Choose JPEG, PNG, WebP, GIF, HEIC, MP4, MOV or WebM media")
+        }
+        guard let token = try await bearerToken(), !token.isEmpty else {
+            throw GoaliathAPIError(status: 401, message: "Please sign in to upload media")
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(mime, forHTTPHeaderField: "X-Media-Mime")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data,response) = try await URLSession.shared.upload(for: request, fromFile: fileURL)
+        guard let response = response as? HTTPURLResponse else { throw GoaliathAPIError(status: 0, message: "No upload response") }
+        guard (200..<300).contains(response.statusCode) else {
+            let detail = try? GoaliathJSON.decoder.decode(ServerErrorEnvelope.self, from: data)
+            throw GoaliathAPIError(status: response.statusCode, message: detail?.error.message ?? "Upload failed (HTTP \(response.statusCode))")
+        }
+        let uploaded = try GoaliathJSON.decoder.decode(GoaliathUploadedMedia.self, from: data)
+        return (uploaded.url, uploaded.kind)
     }
 
     func request<Result: Decodable>(
@@ -53,6 +92,15 @@ struct GoaliathAPIClient {
         }
         return try GoaliathJSON.decoder.decode(Result.self, from: data)
     }
+}
+
+private struct GoaliathUploadedMedia: Decodable { let url: String; let kind: String }
+
+struct GoaliathMediaLinks: Codable, Equatable {
+    var image_urls: [String] = []
+    var video_urls: [String] = []
+    var gif_urls: [String] = []
+    var total: Int { image_urls.count + video_urls.count + gif_urls.count }
 }
 
 private struct ServerErrorEnvelope: Decodable {

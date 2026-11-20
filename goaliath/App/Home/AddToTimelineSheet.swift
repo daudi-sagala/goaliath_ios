@@ -178,6 +178,9 @@ struct TimelineCreationDraft: Codable, Identifiable, Sendable {
     var createdAt: Date
 
     var attachments: [TimelineDraftAttachment]
+    var image_urls: [String] = []
+    var video_urls: [String] = []
+    var gif_urls: [String] = []
 
     // Defaults preserve existing call sites that construct a draft without a scope.
     var visibilityScope: TimelineVisibilityScope = .privateOnly
@@ -210,7 +213,7 @@ struct TimelineCreationDraft: Codable, Identifiable, Sendable {
 extension TimelineCreationDraft {
     private enum CodingKeys: String, CodingKey {
         case id, kind, title, description, startsAt, expiresAt, createdAt
-        case attachments, visibilityScope, visibilityArea, scheduleStatus, actualStartedAt
+        case attachments, image_urls, video_urls, gif_urls, visibilityScope, visibilityArea, scheduleStatus, actualStartedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -223,6 +226,9 @@ extension TimelineCreationDraft {
         expiresAt = try values.decodeIfPresent(Date.self, forKey: .expiresAt)
         createdAt = try values.decode(Date.self, forKey: .createdAt)
         attachments = try values.decode([TimelineDraftAttachment].self, forKey: .attachments)
+        image_urls = try values.decodeIfPresent([String].self, forKey: .image_urls) ?? []
+        video_urls = try values.decodeIfPresent([String].self, forKey: .video_urls) ?? []
+        gif_urls = try values.decodeIfPresent([String].self, forKey: .gif_urls) ?? []
         visibilityScope = try values.decodeIfPresent(TimelineVisibilityScope.self, forKey: .visibilityScope) ?? .privateOnly
         visibilityArea = try values.decodeIfPresent(String.self, forKey: .visibilityArea)
         scheduleStatus = try values.decodeIfPresent(TimelineScheduleStatus.self, forKey: .scheduleStatus)
@@ -673,6 +679,9 @@ struct AddToTimelineSheet: View {
     @State private var selectedMedia: [PhotosPickerItem] = []
 
     @State private var attachments: [TimelineStagedMedia] = []
+    @State private var imageLinks = ""
+    @State private var videoLinks = ""
+    @State private var gifLinks = ""
 
     @State private var isImporting = false
 
@@ -1075,6 +1084,16 @@ struct AddToTimelineSheet: View {
                 }
 
                 .disabled(isImporting || attachments.count >= 8)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Or paste hosted HTTPS media links (comma separated)")
+                        .font(.caption).foregroundStyle(muted)
+                    TextField("Image URLs", text: $imageLinks).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    TextField("Video URLs", text: $videoLinks).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    TextField("GIF URLs", text: $gifLinks).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    Text("Files selected from your device upload to a public bucket only when sharing with Everyone. HTTPS links may be publicly accessible regardless of feed privacy.")
+                        .font(.caption2).foregroundStyle(muted)
+                }
 
                 if isImporting {
 
@@ -1491,6 +1510,14 @@ struct AddToTimelineSheet: View {
     private func saveDraft() {
 
         guard valid else { return }
+        func links(_ raw: String) -> [String] { raw.split(whereSeparator: { $0 == "," || $0 == "\n" }).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } }
+        let images = links(imageLinks), videos = links(videoLinks), gifs = links(gifLinks)
+        let all = images + videos + gifs
+        guard all.count + attachments.count <= 12 && images.count <= 8 && videos.count <= 8 && gifs.count <= 8,
+              all.allSatisfy({ URL(string: $0)?.scheme?.lowercased() == "https" }) else {
+            problem = "Use up to 12 HTTPS media URLs (up to 8 per type)."
+            return
+        }
 
         let draft = TimelineCreationDraft(
 
@@ -1500,7 +1527,7 @@ struct AddToTimelineSheet: View {
 
             startsAt: startsAt, expiresAt: effectiveExpiry,
 
-            createdAt: Date(), attachments: [],
+            createdAt: Date(), attachments: [], image_urls: images, video_urls: videos, gif_urls: gifs,
             visibilityScope: visibilityScope,
             visibilityArea: visibilityScope.requiresArea ? cleanedVisibilityArea : nil,
             scheduleStatus: [.activity, .meal, .workout, .task].contains(kind) ? .scheduled : nil
